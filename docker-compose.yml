@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+    web3trakka:
+        build: .
+        ports:
+            - "7080:7080"
+        env_file:
+            - .env
+        depends_on:
+            - db
+
+    db:
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: w3b3tr4kk487m4c
+            POSTGRES_DB: web3trakka
+        ports:
+            - "5432:5432"

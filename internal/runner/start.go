@@ -18,8 +18,14 @@ type StartRunner struct {
 }
 
 func NewStartRunner() *StartRunner {
-	// TODO: create a Docker Postgres instance and put the following:
-	dbConnString := os.Getenv("DB_CONN_URL")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbSSLMode := os.Getenv("db_sslmode")
+
+	dbConnString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode)
 
 	return &StartRunner{
 		ListenAddr:             ":7080",
