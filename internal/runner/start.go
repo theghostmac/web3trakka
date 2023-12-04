@@ -23,7 +23,7 @@ func NewStartRunner() *StartRunner {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbName := os.Getenv("DB_NAME")
-	dbSSLMode := os.Getenv("db_sslmode")
+	dbSSLMode := os.Getenv("DB_SSLMODE")
 
 	dbConnString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSSLMode)
 
