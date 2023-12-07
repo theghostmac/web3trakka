@@ -20,7 +20,7 @@ type BinanceClient struct {
 func NewBinanceClient() (*BinanceClient, error) {
 	apiKey := os.Getenv("BINANCE_API_KEY")
 	secretKey := os.Getenv("BINANCE_SECRET_KEY")
-	baseURL := os.Getenv("BINANCE_BASE_URL")
+	baseURL := os.Getenv("BINANCE_BASE_URL") // change to BINANCE_BASE_URL_PRODUCTION when ready.
 
 	if apiKey == "" || secretKey == "" {
 		return nil, fmt.Errorf("API key or Secret key is missing")

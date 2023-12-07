@@ -20,7 +20,7 @@ func main() {
 	viewPortfolio := web3trakka.NewPortfolioViewer()
 	setAlert := web3trakka.NewAlertSetter()
 
-	// Define web3trakka
+	// Define web3trakka commands
 	commands := []*cli.Command{
 		{
 			Name:  "start",
@@ -36,11 +36,21 @@ func main() {
 			Action: func(c *cli.Context) error {
 				cryptoName := c.Args().First() // Gets the first argument.
 				if cryptoName == "" {
-					// TODO: write a proper response message for wrong argument formats, raising the 'help' for that command.
-					errMsg := fmt.Sprintf("you did not specify the name of the crypto to be tracked.")
+					errMsg := "Error: No cryptocurrency symbol provided. Please specify a symbol."
 					logger.Error(errMsg)
+					fmt.Println(errMsg)
+					cli.ShowCommandHelp(c, "track")
+					return fmt.Errorf(errMsg)
 				}
-				trackCrypto.TrackCrypto(cryptoName)
+
+				details, err := trackCrypto.TrackCrypto(cryptoName)
+				if err != nil {
+					logger.Error(err.Error())
+					fmt.Println(err.Error())
+					return err
+				}
+
+				fmt.Printf("Details for %s:\n%+v\n", cryptoName, details)
 				return nil
 			},
 		},
