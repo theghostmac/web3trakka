@@ -1,10 +1,58 @@
 package web3trakka
 
+import (
+	"fmt"
+	"github.com/theghostmac/web3trakka/external/binance"
+	"github.com/theghostmac/web3trakka/internal/housekeeper"
+	"strings"
+)
+
+var logger = housekeeper.NewCustomLogger()
+
 func NewCryptoTracker() *TrackCrypto {
 	return &TrackCrypto{}
 }
 
-func (tc *TrackCrypto) TrackCrypto(cryptoName string) {
-	// TODO: implement logic to track the specified cryptocurrency.
-	// use binance api to fetch the latest price of the specified cryptocurrency.
+func (tc *TrackCrypto) TrackCrypto(cryptoSymbol string) (*binance.SymbolDetails, error) {
+	binanceClient, err := binance.NewBinanceClient()
+	if err != nil {
+		logger.Error(fmt.Sprintf("Failed to initialize Binance client: %v", err))
+		return nil, err
+	}
+
+	details, err := binanceClient.GetSymbolDetails(cryptoSymbol)
+	if err != nil {
+		logger.Error(fmt.Sprintf("Failed to fetch symbol details: %v", err))
+		return nil, err
+	}
+
+	// Format and display the details
+	formattedDetails := ProvideSymbolDetailsResponse(details)
+	fmt.Println(formattedDetails)
+
+	return details, nil
+}
+
+// ProvideSymbolDetailsResponse creates a user-friendly string representation of the crypto details.
+func ProvideSymbolDetailsResponse(details *binance.SymbolDetails) string {
+	if details == nil {
+		return "No details available."
+	}
+
+	var builder strings.Builder
+	builder.WriteString(fmt.Sprintf("Symbol: %s\n", details.Symbol))
+	builder.WriteString(fmt.Sprintf("Status: %s\n", details.Status))
+	builder.WriteString(fmt.Sprintf("Base Asset: %s\n", details.BaseAsset))
+	builder.WriteString(fmt.Sprintf("Quote Asset: %s\n", details.QuoteAsset))
+	builder.WriteString(fmt.Sprintf("Is Spot Trading Allowed: %t\n", details.IsSpotTradingAllowed))
+	builder.WriteString(fmt.Sprintf("Is Margin Trading Allowed: %t\n", details.IsMarginTradingAllowed))
+	builder.WriteString(fmt.Sprintf("Price Change: %s\n", details.PriceChange))
+	builder.WriteString(fmt.Sprintf("Price Change Percent: %s%%\n", details.PriceChangePercent))
+	builder.WriteString(fmt.Sprintf("Last Price: %s\n", details.LastPrice))
+	builder.WriteString(fmt.Sprintf("High Price: %s\n", details.HighPrice))
+	builder.WriteString(fmt.Sprintf("Low Price: %s\n", details.LowPrice))
+	builder.WriteString(fmt.Sprintf("Volume: %s\n", details.Volume))
+	// TODO: Add more fields if necessary.
+
+	return builder.String()
 }
