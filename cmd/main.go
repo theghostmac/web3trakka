@@ -70,6 +70,14 @@ func main() {
 				return nil
 			},
 		},
+		{
+			Name:  "arbitrage",
+			Usage: "Find arbitrage opportunities across exchanges",
+			Action: func(c *cli.Context) error {
+				// Logic to execute arbitrage strategy
+				return nil
+			},
+		},
 		// TODO: Add additional web3trakka commands here
 	}
 
