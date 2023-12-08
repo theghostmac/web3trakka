@@ -36,4 +36,7 @@ func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, er
 		return nil, fmt.Errorf("error querying Kraken API: %v", err)
 	}
 
+	// TODO: delete these.
+	fmt.Println(response)
+	return nil, err
 }
