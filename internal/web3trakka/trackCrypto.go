@@ -13,6 +13,7 @@ func NewCryptoTracker() *TrackCrypto {
 	return &TrackCrypto{}
 }
 
+// TrackCrypto tracks a new cryptocurrency pair.
 func (tc *TrackCrypto) TrackCrypto(cryptoSymbol string) (*binance.SymbolDetails, error) {
 	binanceClient, err := binance.NewBinanceClient()
 	if err != nil {
