@@ -31,7 +31,7 @@ func NewBinanceClient() (*BinanceClient, error) {
 }
 
 // GetSymbolDetails fetches and returns details for a specific symbol
-func (bc *BinanceClient) GetSymbolDetails(symbol string) (*SymbolDetails, error) {
+func (bc *BinanceClient) GetSymbolDetails(pairSymbol string) (*SymbolDetails, error) {
 	// Fetch exchange information
 	exchangeInfo, err := bc.Client.NewExchangeInfoService().Do(context.Background())
 	if err != nil {
@@ -42,7 +42,7 @@ func (bc *BinanceClient) GetSymbolDetails(symbol string) (*SymbolDetails, error)
 
 	// Iterate over the symbols to find the specific one
 	for _, s := range exchangeInfo.Symbols {
-		if s.Symbol == symbol {
+		if s.Symbol == pairSymbol {
 			details := SymbolDetails{
 				Symbol:                 s.Symbol,
 				Status:                 s.Status,
@@ -59,9 +59,9 @@ func (bc *BinanceClient) GetSymbolDetails(symbol string) (*SymbolDetails, error)
 			}
 
 			// Optional: Fetch additional data like 24hr ticker price change statistics
-			ticker24hr, err := bc.Client.NewTicker24hrService().Symbol(symbol).Do(context.Background())
+			ticker24hr, err := bc.Client.NewTicker24hrService().Symbol(pairSymbol).Do(context.Background())
 			if err != nil {
-				errMsg := fmt.Sprintf("Failed to fetch 24hr ticker data for symbol %s: %v", symbol, err)
+				errMsg := fmt.Sprintf("Failed to fetch 24hr ticker data for pairSymbol %s: %v", pairSymbol, err)
 				logger.Warning(errMsg)
 			} else {
 				// Populate the price change statistics fields in details
@@ -87,5 +87,5 @@ func (bc *BinanceClient) GetSymbolDetails(symbol string) (*SymbolDetails, error)
 		}
 	}
 
-	return nil, fmt.Errorf("symbol %s not found", symbol)
+	return nil, fmt.Errorf("pairSymbol %s not found", pairSymbol)
 }

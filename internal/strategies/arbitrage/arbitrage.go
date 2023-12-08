@@ -5,7 +5,9 @@ type Arbitrage struct {
 
 // FindArbitrage finds arbitrage opportunities across exchanges.
 func (a *Arbitrage) FindArbitrage() {
-	// TODO: Implement this
+	// Fetch prices from different exchanges
+	// Compare prices and calculate profit potential
+	// Log or act on opportunities
 }
 
 // GetExchangeDetails gets details for a given exchange.

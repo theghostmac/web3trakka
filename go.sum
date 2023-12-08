@@ -1,3 +1,5 @@
+github.com/beldur/kraken-go-api-client v0.0.0-20230419090603-9d20ca5131b1 h1:RHf78iWHzSwQ0govPg0z/lmme4Opy7CXD9LUD24zVOI=
+github.com/beldur/kraken-go-api-client v0.0.0-20230419090603-9d20ca5131b1/go.mod h1:NtR1i+x0BHgyscUkgG1FlAokpIxNDKgLO3301OLxWt0=
 github.com/binance/binance-connector-go v0.5.2 h1:FZvVn6Tsy1XQzMagwnoDF6yvlawQE4wimAZEmpi6PAA=
 github.com/binance/binance-connector-go v0.5.2/go.mod h1:p9rdJx+s01YdOhyjJRM+HxoouocCnuLeM2yhSftHkWQ=
 github.com/bitly/go-simplejson v0.5.1 h1:xgwPbetQScXt1gh9BmoJ6j9JMr3TElvuIyjR8pgdoow=
