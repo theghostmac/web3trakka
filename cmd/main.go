@@ -91,15 +91,10 @@ func main() {
 					logger.Error(fmt.Sprintf("Failed to fetch details from Kraken: %v", err))
 					return err
 				}
-
-				// Compare prices and find arbitrage opportunities
-				// This is a simplified example; you'll need to implement the actual comparison logic
+				
 				fmt.Printf("Binance: %+v\n", binanceDetails)
 				fmt.Println("And now for the Kraken exchange info: \t")
 				fmt.Printf("Kraken: %+v\n", krakenDetails)
-
-				// Example: Compare `binanceDetails.LastPrice` with `krakenDetails.LastPrice`
-				// Remember to consider fees, transfer times, and other factors in your real implementation
 
 				return nil
 			},

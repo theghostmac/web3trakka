@@ -54,6 +54,39 @@ func convertToUint64(value interface{}) (uint64, error) {
 	}
 }
 
+// GetSymbolDetails fetches and returns details for a specific pair
+func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, error) {
+	// Convert pair to Kraken's format.
+	krakenPair := crypto.ConvertPairName(pair)
+
+	// Query Kraken API
+	response, err := kc.Client.Query("Ticker", map[string]string{"pair": krakenPair})
+	if err != nil {
+		logger.Error("Failed to fetch Ticker prices from Kraken Client")
+		return nil, fmt.Errorf("error querying Kraken API: %v", err)
+	}
+
+	// Extract the data from the response
+	data, ok := response.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected response format from Kraken API")
+	}
+
+	// Extract the pair data using the correct key.
+	pairData, ok := data[krakenPair].(map[string]interface{})
+	if !ok {
+		// If the key doesn't match, log the keys for debugging
+		keys := make([]string, 0, len(data))
+		for k := range data {
+			keys = append(keys, k)
+		}
+		logger.Info(fmt.Sprintf("available keys in response: %v", keys))
+		return nil, fmt.Errorf("pair data not found in response for %s", krakenPair)
+	}
+
+	return NormalizePairDetails(pairData)
+}
+
 // NormalizePairDetails normalizes the data returned from Kraken API.
 func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetails, error) {
 	lastTrade, ok := pairData["c"].([]interface{})
@@ -142,7 +175,7 @@ func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetail
 
 	// Building the SymbolDetails struct
 	details := &crypto.SymbolDetails{
-		Symbol:           "", // Symbol should be set by the caller
+		Symbol:           "", // TODO: set the Symbol in the caller function.
 		LastPrice:        lastTradePrice,
 		HighPrice:        high24h,
 		LowPrice:         low24h,
@@ -155,40 +188,4 @@ func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetail
 	}
 
 	return details, nil
-}
-
-// GetSymbolDetails fetches and returns details for a specific pair
-func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, error) {
-	// Convert pair to Kraken's format.
-	krakenPair := crypto.ConvertPairName(pair)
-
-	// Query Kraken API
-	response, err := kc.Client.Query("Ticker", map[string]string{"pair": krakenPair})
-	if err != nil {
-		logger.Error("Failed to fetch Ticker prices from Kraken Client")
-		return nil, fmt.Errorf("error querying Kraken API: %v", err)
-	}
-
-	// Log the raw response for debugging
-	logger.Info(fmt.Sprintf("Raw Kraken response: %+v", response))
-
-	// Extract the data from the response
-	data, ok := response.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("unexpected response format from Kraken API")
-	}
-
-	// Extract the pair data using the correct key.
-	pairData, ok := data[krakenPair].(map[string]interface{})
-	if !ok {
-		// If the key doesn't match, log the keys for debugging
-		keys := make([]string, 0, len(data))
-		for k := range data {
-			keys = append(keys, k)
-		}
-		logger.Info(fmt.Sprintf("available keys in response: %v", keys))
-		return nil, fmt.Errorf("pair data not found in response for %s", krakenPair)
-	}
-
-	return NormalizePairDetails(pairData)
 }
