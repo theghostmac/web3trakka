@@ -35,6 +35,7 @@ func (a *Arbitrage) FindArbitrageOpportunities(symbolPair string) error {
 
 // ArbitrageOpportunity represents an arbitrage opportunity on different exchanges.
 type ArbitrageOpportunity struct {
+	Symbol       string
 	BuyExchange  string
 	SellExchange string
 	BuyPrice     float64
@@ -82,6 +83,27 @@ func identifyArbitrageOpportunities(detailsMap map[string]*crypto.SymbolDetails)
 // ExecuteTradeOnExchanges places a trade on the exchange.
 func (a *Arbitrage) ExecuteTradeOnExchanges(opportunities []ArbitrageOpportunity) {
 	// TODO: implement trade execution based on identified arbitrage opportunities.
+	for _, opp := range opportunities {
+		// Logic to execute trades based on opportunities.
+
+		// Buy on BuyExchange.
+		err := a.placeOrder(opp.BuyExchange, opp.Symbol, "buy", opp.BuyPrice)
+		if err != nil {
+			fmt.Printf("Failed to place buy order on %s: %v\n", opp.BuyExchange, err)
+			continue
+		}
+
+		// Sell on SellExchange.
+		err = a.placeOrder(opp.SellExchange, opp.Symbol, "sell", opp.SellPrice)
+		if err != nil {
+			fmt.Printf("Failed to place sell order on %s: %v\n", opp.SellExchange, err)
+			continue
+		}
+
+		// Log successful trade execution.
+		fmt.Printf("Executed arbitrage trade: Buy on %s at %f, Sell on %s at %f\n",
+			opp.BuyExchange, opp.BuyPrice, opp.SellExchange, opp.SellPrice)
+	}
 }
 
 func (a *Arbitrage) getSymbolDetailsFromExchanges(symbolPair string) map[string]*crypto.SymbolDetails {
@@ -113,4 +135,20 @@ func (a *Arbitrage) getExchangeIdentifier(exchange ExchangeClient) string {
 	}
 
 	return exchangeType.Name()
+}
+
+// placeOrder is responsible for placing an order on an exchange.
+func (a *Arbitrage) placeOrder(exchangeName, symbol, orderType string, price float64) error {
+	switch exchangeName {
+	case "Binance":
+		// TODO: call the Binance ExecuteTrade method.
+		fmt.Printf("Calling Binance ExecuteTrade method...")
+	case "Kraken":
+		// TODO: call the Kraken ExecuteTrade method.
+		fmt.Printf("Calling Kraken ExecuteTrade method...")
+	default:
+		return fmt.Errorf("exchange not supported: %s", exchangeName)
+	}
+
+	return nil
 }
