@@ -7,7 +7,6 @@ import (
 	"github.com/theghostmac/web3trakka/external/kraken"
 	"github.com/theghostmac/web3trakka/external/okex"
 	"github.com/theghostmac/web3trakka/internal/housekeeper"
-	"reflect"
 	"sort"
 )
 
@@ -27,9 +26,21 @@ var logger = housekeeper.NewCustomLogger()
 func (a *Arbitrage) FindArbitrageOpportunities(symbolPair string) error {
 	symbolDetailsMap := a.getSymbolDetailsFromExchanges(symbolPair)
 
+	// Logging the fetched details.
+	for exchange, details := range symbolDetailsMap {
+		detailsMsg := fmt.Sprintf("Details from %s: %+v", exchange, details)
+		logger.Info(detailsMsg)
+	}
+
 	arbitrageOpportunities := identifyArbitrageOpportunities(symbolDetailsMap)
 
-	if len(arbitrageOpportunities) > 0 {
+	// Logging the identified arbitrage opportunities.
+	if len(arbitrageOpportunities) == 0 {
+		logger.Info("No arbitrage opportunities found.")
+	} else {
+		for _, opp := range arbitrageOpportunities {
+			logger.Info(fmt.Sprintf("Opportunity: %+v", opp))
+		}
 		a.ExecuteTradeOnExchanges(arbitrageOpportunities)
 	}
 
@@ -129,16 +140,30 @@ func (a *Arbitrage) getSymbolDetailsFromExchanges(symbolPair string) map[string]
 	return symbolDetailsMap
 }
 
-// getExchangeIdentifier returns a unique identifier for an exchange client.
+// getExchangeIdentifier returns a standardized identifier for an exchange client.
 func (a *Arbitrage) getExchangeIdentifier(exchange ExchangeClient) string {
-	exchangeType := reflect.TypeOf(exchange)
-
-	if exchangeType.Kind() == reflect.Ptr {
-		exchangeType = exchangeType.Elem()
+	switch exchange.(type) {
+	case *binance.BinanceClient:
+		return "Binance"
+	case *kraken.KrakenClient:
+		return "Kraken"
+	case *okex.OKEXClient:
+		return "OKEX"
+	default:
+		return "Unknown"
 	}
-
-	return exchangeType.Name()
 }
+
+//// getExchangeIdentifier returns a unique identifier for an exchange client.
+//func (a *Arbitrage) getExchangeIdentifier(exchange ExchangeClient) string {
+//	exchangeType := reflect.TypeOf(exchange)
+//
+//	if exchangeType.Kind() == reflect.Ptr {
+//		exchangeType = exchangeType.Elem()
+//	}
+//
+//	return exchangeType.Name()
+//}
 
 // placeOrder is responsible for placing an order on an exchange.
 func (a *Arbitrage) placeOrder(exchangeName, symbol, orderType string, price float64) error {
