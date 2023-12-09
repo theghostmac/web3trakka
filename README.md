@@ -28,6 +28,7 @@ To see how a command works, run this to show help:
 
 ## Tracking Crypto Pairs
 To track a crypto pair, say ETHUSDT, just run:
+
 ```shell
 make build
 # then

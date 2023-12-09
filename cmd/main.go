@@ -98,9 +98,9 @@ func main() {
 					cli.ShowCommandHelp(c, "arbitrage")
 					return fmt.Errorf(errMsg)
 				}
-				err := arbitrager.FindArbitrage(symbolPair)
+				err := arbitrager.FindArbitrageOpportunities(symbolPair)
 				if err != nil {
-					errMsg := fmt.Sprintf("Failed to call the FindArbitrage method against the pair: %v", err)
+					errMsg := fmt.Sprintf("Failed to call the FindArbitrageOpportunities method against the pair: %v", err)
 					logger.Error(errMsg)
 				}
 

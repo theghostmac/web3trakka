@@ -18,8 +18,8 @@ func NewArbitrage(exchanges []ExchangeClient) *Arbitrage {
 
 var logger = housekeeper.NewCustomLogger()
 
-// FindArbitrage finds arbitrage opportunities across exchanges.
-func (a *Arbitrage) FindArbitrage(symbolPair string) error {
+// FindArbitrageOpportunities finds arbitrage opportunities across exchanges.
+func (a *Arbitrage) FindArbitrageOpportunities(symbolPair string) error {
 	var symbolDetailsMap = make(map[string]*crypto.SymbolDetails)
 
 	for _, exchange := range a.Exchanges {
@@ -39,12 +39,12 @@ func (a *Arbitrage) FindArbitrage(symbolPair string) error {
 		logger.Info(detailsMsg)
 	}
 
-	// TODO: call ExecuteTrade.
+	// TODO: call ExecuteTradeOnExchanges.
 	return nil
 }
 
-// ExecuteTrade places a trade on the exchange.
-func (a *Arbitrage) ExecuteTrade() {
+// ExecuteTradeOnExchanges places a trade on the exchange.
+func (a *Arbitrage) ExecuteTradeOnExchanges() {
 	// TODO: Compare prices and calculate profit potential.
 	// If the profit is considerably good,
 	// Log or act on opportunity.
