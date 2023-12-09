@@ -56,8 +56,11 @@ func convertToUint64(value interface{}) (uint64, error) {
 
 // GetSymbolDetails fetches and returns details for a specific pair
 func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, error) {
+	standardPairName := getStandardPairName("Kraken", pair)
+	krakenPair := standardPairName
+
 	// Convert pair to Kraken's format.
-	krakenPair := crypto.ConvertPairName(pair)
+	krakenPair = crypto.ConvertPairName(pair)
 
 	// Query Kraken API
 	response, err := kc.Client.Query("Ticker", map[string]string{"pair": krakenPair})
@@ -192,4 +195,18 @@ func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetail
 	}
 
 	return details, nil
+}
+
+var pairNameMapping = map[string]string{
+	"DOGEUSD": "XDGUSD", // Binance to Kraken mapping
+	// TODO: Add other mappings I find
+}
+
+func getStandardPairName(exchangeName, pairName string) string {
+	if exchangeName == "Kraken" {
+		if mappedName, ok := pairNameMapping[pairName]; ok {
+			return mappedName
+		}
+	}
+	return pairName
 }
