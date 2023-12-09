@@ -1,3 +1,5 @@
+github.com/amir-the-h/okex v1.1.4-alpha h1:dnn14GAUxi0W2yNxL2GERZTZ/iAUkCBnAbV6Z/CxWv8=
+github.com/amir-the-h/okex v1.1.4-alpha/go.mod h1:ngcGmYzAiBKg18umdZqBDM8aluy3Q0gJMGSyeLo1XHA=
 github.com/beldur/kraken-go-api-client v0.0.0-20230419090603-9d20ca5131b1 h1:RHf78iWHzSwQ0govPg0z/lmme4Opy7CXD9LUD24zVOI=
 github.com/beldur/kraken-go-api-client v0.0.0-20230419090603-9d20ca5131b1/go.mod h1:NtR1i+x0BHgyscUkgG1FlAokpIxNDKgLO3301OLxWt0=
 github.com/binance/binance-connector-go v0.5.2 h1:FZvVn6Tsy1XQzMagwnoDF6yvlawQE4wimAZEmpi6PAA=

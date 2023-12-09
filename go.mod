@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/amir-the-h/okex v1.1.4-alpha // indirect
 	github.com/beldur/kraken-go-api-client v0.0.0-20230419090603-9d20ca5131b1 // indirect
 	github.com/bitly/go-simplejson v0.5.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.3 // indirect

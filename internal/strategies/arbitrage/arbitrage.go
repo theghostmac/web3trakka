@@ -22,6 +22,7 @@ var logger = housekeeper.NewCustomLogger()
 func (a *Arbitrage) FindArbitrageOpportunities(symbolPair string) error {
 	var symbolDetailsMap = make(map[string]*crypto.SymbolDetails)
 
+	// Go through all exchanges and get the symbol details of the pair on them.
 	for _, exchange := range a.Exchanges {
 		details, err := exchange.GetSymbolDetails(symbolPair)
 		if err != nil {
@@ -32,9 +33,9 @@ func (a *Arbitrage) FindArbitrageOpportunities(symbolPair string) error {
 		symbolDetailsMap[details.Symbol] = details
 	}
 
-	// Compare prices from different exchanges.
+	// Compare prices of the pair from the different exchanges.
 	for symbol, details := range symbolDetailsMap {
-		// TODO: move from a
+		// TODO: move from this, to the proper logic.
 		detailsMsg := fmt.Sprintf("Details for %s: %+v", symbol, details)
 		logger.Info(detailsMsg)
 	}
