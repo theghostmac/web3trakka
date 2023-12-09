@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/theghostmac/web3trakka/external/binance"
+	"github.com/theghostmac/web3trakka/external/kraken"
 	"github.com/theghostmac/web3trakka/internal/housekeeper"
 	"github.com/theghostmac/web3trakka/internal/runner"
 	"github.com/theghostmac/web3trakka/internal/web3trakka"
@@ -34,23 +36,71 @@ func main() {
 			Name:  "track",
 			Usage: "Track a new cryptocurrency",
 			Action: func(c *cli.Context) error {
-				cryptoName := c.Args().First() // Gets the first argument.
-				if cryptoName == "" {
+				symbolPair := c.Args().First() // Gets the first argument.
+				if symbolPair == "" {
 					errMsg := "Error: No cryptocurrency symbol provided. Please specify a symbol."
 					logger.Error(errMsg)
-					fmt.Println(errMsg)
 					cli.ShowCommandHelp(c, "track")
 					return fmt.Errorf(errMsg)
 				}
 
-				details, err := trackCrypto.TrackCrypto(cryptoName)
+				details, err := trackCrypto.TrackCrypto(symbolPair)
 				if err != nil {
 					logger.Error(err.Error())
-					fmt.Println(err.Error())
 					return err
 				}
 
-				fmt.Printf("Details for %s:\n%+v\n", cryptoName, details)
+				fmt.Printf("Details for %s:\n%+v\n", symbolPair, details)
+				return nil
+			},
+		},
+		{
+			Name:  "arbitrage",
+			Usage: "Find arbitrage opportunities across exchanges",
+			Action: func(c *cli.Context) error {
+				symbolPair := c.Args().First() // Gets the first argument.
+				if symbolPair == "" {
+					errMsg := "Error: No cryptocurrency pair symbol provided. Please specify a pair."
+					logger.Error(errMsg)
+					cli.ShowCommandHelp(c, "arbitrage")
+					return fmt.Errorf(errMsg)
+				}
+
+				// Initialize clients for the exchanges
+				binanceClient, err := binance.NewBinanceClient()
+				if err != nil {
+					logger.Error(fmt.Sprintf("Failed to initialize Binance client: %v", err))
+					return err
+				}
+
+				krakenClient, err := kraken.NewKrakenClient()
+				if err != nil {
+					logger.Error(fmt.Sprintf("Failed to initialize Kraken client: %v", err))
+					return err
+				}
+
+				// Fetch details from each exchange
+				binanceDetails, err := binanceClient.GetSymbolDetails(symbolPair)
+				if err != nil {
+					logger.Error(fmt.Sprintf("Failed to fetch details from Binance: %v", err))
+					return err
+				}
+
+				krakenDetails, err := krakenClient.GetSymbolDetails(symbolPair)
+				if err != nil {
+					logger.Error(fmt.Sprintf("Failed to fetch details from Kraken: %v", err))
+					return err
+				}
+
+				// Compare prices and find arbitrage opportunities
+				// This is a simplified example; you'll need to implement the actual comparison logic
+				fmt.Printf("Binance: %+v\n", binanceDetails)
+				fmt.Println("And now for the Kraken exchange info: \t")
+				fmt.Printf("Kraken: %+v\n", krakenDetails)
+
+				// Example: Compare `binanceDetails.LastPrice` with `krakenDetails.LastPrice`
+				// Remember to consider fees, transfer times, and other factors in your real implementation
+
 				return nil
 			},
 		},
@@ -70,14 +120,7 @@ func main() {
 				return nil
 			},
 		},
-		{
-			Name:  "arbitrage",
-			Usage: "Find arbitrage opportunities across exchanges",
-			Action: func(c *cli.Context) error {
-				// Logic to execute arbitrage strategy
-				return nil
-			},
-		},
+
 		// TODO: Add additional web3trakka commands here
 	}
 
