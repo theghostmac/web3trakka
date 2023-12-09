@@ -4,23 +4,56 @@ import (
 	"fmt"
 	"github.com/theghostmac/web3trakka/external/binance"
 	"github.com/theghostmac/web3trakka/external/kraken"
+	"github.com/theghostmac/web3trakka/external/okex"
 	"github.com/theghostmac/web3trakka/internal/housekeeper"
 	"github.com/theghostmac/web3trakka/internal/runner"
+	"github.com/theghostmac/web3trakka/internal/strategies/arbitrage"
 	"github.com/theghostmac/web3trakka/internal/web3trakka"
 	"github.com/urfave/cli/v2"
 	"os"
 )
 
+// initialize the housekeeper.
+var logger = housekeeper.NewCustomLogger()
+
 func main() {
 	// Initialize the runner.
 	startRunner := runner.NewStartRunner()
 
-	// initialize the housekeeper.
-	logger := housekeeper.NewCustomLogger()
+	var exchanges []arbitrage.ExchangeClient
+
+	// Initialize clients for exchanges.
+	binanceClient, err := binance.NewBinanceClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize binance client due to: %v", err)
+		logger.Error(errMsg)
+	} else {
+		exchanges = append(exchanges, binanceClient)
+	}
+
+	krakenClient, err := kraken.NewKrakenClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize kraken client due to: %v", err)
+		logger.Error(errMsg)
+	} else {
+		exchanges = append(exchanges, krakenClient)
+	}
+
+	okEXClient, err := okex.NewOKEXClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize binance client due to: %v", err)
+		logger.Error(errMsg)
+	} else {
+		exchanges = append(exchanges, okEXClient)
+	}
 
 	trackCrypto := web3trakka.NewCryptoTracker()
 	viewPortfolio := web3trakka.NewPortfolioViewer()
 	setAlert := web3trakka.NewAlertSetter()
+
+	arbitrager := arbitrage.NewArbitrage([]arbitrage.ExchangeClient{
+		binanceClient, krakenClient,
+	})
 
 	// Define web3trakka commands
 	commands := []*cli.Command{
@@ -65,36 +98,11 @@ func main() {
 					cli.ShowCommandHelp(c, "arbitrage")
 					return fmt.Errorf(errMsg)
 				}
-
-				// Initialize clients for the exchanges
-				binanceClient, err := binance.NewBinanceClient()
+				err := arbitrager.FindArbitrage(symbolPair)
 				if err != nil {
-					logger.Error(fmt.Sprintf("Failed to initialize Binance client: %v", err))
-					return err
+					errMsg := fmt.Sprintf("Failed to call the FindArbitrage method against the pair: %v", err)
+					logger.Error(errMsg)
 				}
-
-				krakenClient, err := kraken.NewKrakenClient()
-				if err != nil {
-					logger.Error(fmt.Sprintf("Failed to initialize Kraken client: %v", err))
-					return err
-				}
-
-				// Fetch details from each exchange
-				binanceDetails, err := binanceClient.GetSymbolDetails(symbolPair)
-				if err != nil {
-					logger.Error(fmt.Sprintf("Failed to fetch details from Binance: %v", err))
-					return err
-				}
-
-				krakenDetails, err := krakenClient.GetSymbolDetails(symbolPair)
-				if err != nil {
-					logger.Error(fmt.Sprintf("Failed to fetch details from Kraken: %v", err))
-					return err
-				}
-				
-				fmt.Printf("Binance: %+v\n", binanceDetails)
-				fmt.Println("And now for the Kraken exchange info: \t")
-				fmt.Printf("Kraken: %+v\n", krakenDetails)
 
 				return nil
 			},
@@ -124,7 +132,7 @@ func main() {
 		Commands: commands,
 	}
 
-	err := app.Run(os.Args)
+	err = app.Run(os.Args)
 	if err != nil {
 		errMsg := fmt.Sprintf("error: %s", err)
 		logger.Fatal(errMsg)

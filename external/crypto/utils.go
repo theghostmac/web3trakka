@@ -2,12 +2,11 @@ package crypto
 
 import (
 	"fmt"
-	"github.com/theghostmac/web3trakka/external/binance"
 	"strings"
 )
 
 // ProvideSymbolDetailsResponse creates a user-friendly string representation of the crypto details.
-func ProvideSymbolDetailsResponse(details *binance.SymbolDetails) string {
+func ProvideSymbolDetailsResponse(details *SymbolDetails) string {
 	if details == nil {
 		return "No details available."
 	}

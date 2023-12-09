@@ -87,6 +87,8 @@ func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, er
 	return NormalizePairDetails(pairData)
 }
 
+func (kc *KrakenClient) ExecuteTrade() {}
+
 // NormalizePairDetails normalizes the data returned from Kraken API.
 func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetails, error) {
 	lastTrade, ok := pairData["c"].([]interface{})

@@ -14,7 +14,7 @@ func NewCryptoTracker() *TrackCrypto {
 }
 
 // TrackCrypto tracks a new cryptocurrency pair.
-func (tc *TrackCrypto) TrackCrypto(cryptoSymbol string) (*binance.SymbolDetails, error) {
+func (tc *TrackCrypto) TrackCrypto(cryptoSymbol string) (*crypto.SymbolDetails, error) {
 	binanceClient, err := binance.NewBinanceClient()
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to initialize Binance client: %v", err))
