@@ -6,6 +6,7 @@ import (
 	"github.com/theghostmac/web3trakka/external/crypto"
 	"github.com/theghostmac/web3trakka/internal/housekeeper"
 	"os"
+	"strconv"
 )
 
 // KrakenClient represents a client for Kraken API.
@@ -29,76 +30,128 @@ func NewKrakenClient() (*KrakenClient, error) {
 	return &KrakenClient{Client: krakenClient}, nil
 }
 
+// convertToFloat64 converts an interface to float64.
+func convertToFloat64(value interface{}) (float64, error) {
+	switch v := value.(type) {
+	case string:
+		return strconv.ParseFloat(v, 64)
+	case float64:
+		return v, nil
+	default:
+		return 0, fmt.Errorf("unexpected type: %T", v)
+	}
+}
+
+// convertToUint64 converts an interface to uint64.
+func convertToUint64(value interface{}) (uint64, error) {
+	switch v := value.(type) {
+	case string:
+		return strconv.ParseUint(v, 10, 64)
+	case float64:
+		return uint64(v), nil
+	default:
+		return 0, fmt.Errorf("unexpected type: %T", v)
+	}
+}
+
 // NormalizePairDetails normalizes the data returned from Kraken API.
 func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetails, error) {
 	lastTrade, ok := pairData["c"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected last trade data format from Kraken API")
+		return nil, fmt.Errorf("unexpected or missing 'c' field in response")
 	}
-	lastTradePrice := lastTrade[0].(string)
-
-	volume, ok := pairData["v"].([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("unexpected volume data format from Kraken API")
+	lastTradePrice, err := convertToFloat64(lastTrade[0])
+	if err != nil {
+		return nil, fmt.Errorf("error converting last trade price: %v", err)
 	}
-	volume24h := volume[1].(string) // Assuming the 24h volume is the second element
 
 	high, ok := pairData["h"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected high data format from Kraken API")
+		return nil, fmt.Errorf("unexpected or missing 'h' in response")
 	}
-	high24h := high[1].(string) // Assuming the 24h high is the second element
+	high24h, err := convertToFloat64(high[1])
+	if err != nil {
+		return nil, fmt.Errorf("error converting high 24hrs: %v", err)
+	}
 
 	low, ok := pairData["l"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected low data format from Kraken API")
+		return nil, fmt.Errorf("unexpected or missing 'l' in response")
 	}
-	low24h := low[1].(string) // I assume the 24h low is the second element
+	low24h, err := convertToFloat64(low[1])
+	if err != nil {
+		return nil, fmt.Errorf("error converting low 24hrs: %v", err)
+	}
 
-	// Extracting additional details
 	bidData, ok := pairData["b"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected bid data format from Kraken API")
+		return nil, fmt.Errorf("unexpected or missing 'b' in response")
 	}
-	bidPrice := bidData[0].(string)
+	bidPrice, err := convertToFloat64(bidData[0])
+	if err != nil {
+		return nil, fmt.Errorf("error converting bid price: %v", err)
+	}
 
 	askData, ok := pairData["a"].([]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected ask data format from Kraken API")
+		return nil, fmt.Errorf("unexpected or missing 'a' in response")
 	}
-	askPrice := askData[0].(string)
+	askPrice, err := convertToFloat64(askData[0])
+	if err != nil {
+		return nil, fmt.Errorf("error converting ask price: %v", err)
+	}
 
+	// Extracting the 'o' field (open price)
+	openPriceVal, ok := pairData["o"]
+	if !ok {
+		return nil, fmt.Errorf("unexpected or missing 'o' field in response")
+	}
+	openPrice, err := convertToFloat64(openPriceVal)
+	if err != nil {
+		return nil, fmt.Errorf("error converting open price: %v", err)
+	}
+
+	volume, ok := pairData["v"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected or missing 'v' field in response")
+	}
+	volume24h, err := convertToFloat64(volume[1])
+	if err != nil {
+		return nil, fmt.Errorf("error converting volume 24hrs: %v", err)
+	}
+
+	avgPriceData, ok := pairData["p"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected average price data format from Kraken API")
+	}
+	avgPriceStr := avgPriceData[1].(string) // Assuming 24h average price
+
+	avgPrice, err := strconv.ParseFloat(avgPriceStr, 64)
+	if err != nil {
+		return nil, fmt.Errorf("could not convert average price to float64: %s", err)
+	}
+
+	totalTradesData, ok := pairData["t"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected total trades data format from Kraken API")
+	}
+	totalTrades, err := convertToUint64(totalTradesData[1])
+	if err != nil {
+		return nil, fmt.Errorf("error converting total trades: %v", err)
+	}
+
+	// Building the SymbolDetails struct
 	details := &crypto.SymbolDetails{
-		Symbol:                 pair,
-		Status:                 "",
-		BaseAsset:              "",
-		BaseAssetPrecision:     0,
-		QuoteAsset:             "",
-		QuotePrecision:         0,
-		OrderTypes:             nil,
-		IcebergAllowed:         false,
-		OcoAllowed:             false,
-		IsSpotTradingAllowed:   false,
-		IsMarginTradingAllowed: false,
-		Filters:                nil,
-		Permissions:            nil,
-		PriceChange:            "",
-		PriceChangePercent:     "",
-		WeightedAvgPrice:       "",
-		PrevClosePrice:         "",
-		LastPrice:              lastTradePrice,
-		BidPrice:               bidPrice,
-		AskPrice:               askPrice,
-		OpenPrice:              "",
-		HighPrice:              high24h,
-		LowPrice:               low24h,
-		Volume:                 volume24h,
-		QuoteVolume:            "",
-		OpenTime:               0,
-		CloseTime:              0,
-		FirstId:                0,
-		LastId:                 0,
-		Count:                  0,
+		Symbol:           "", // Symbol should be set by the caller
+		LastPrice:        lastTradePrice,
+		HighPrice:        high24h,
+		LowPrice:         low24h,
+		Volume:           volume24h,
+		BidPrice:         bidPrice,
+		AskPrice:         askPrice,
+		OpenPrice:        openPrice,
+		WeightedAvgPrice: avgPrice,
+		Count:            totalTrades,
 	}
 
 	return details, nil
@@ -108,6 +161,8 @@ func NormalizePairDetails(pairData map[string]interface{}) (*crypto.SymbolDetail
 func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, error) {
 	// Convert pair to Kraken's format.
 	krakenPair := crypto.ConvertPairName(pair)
+
+	// Query Kraken API
 	response, err := kc.Client.Query("Ticker", map[string]string{"pair": krakenPair})
 	if err != nil {
 		logger.Error("Failed to fetch Ticker prices from Kraken Client")
@@ -117,22 +172,21 @@ func (kc *KrakenClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, er
 	// Log the raw response for debugging
 	logger.Info(fmt.Sprintf("Raw Kraken response: %+v", response))
 
-	// Asserting response to be of type map[string]interface{}
-	responseMap, ok := response.(map[string]interface{})
+	// Extract the data from the response
+	data, ok := response.(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected type for Kraken response")
+		return nil, fmt.Errorf("unexpected response format from Kraken API")
 	}
 
-	// Check and log the structure of the 'result' field
-	logger.Info(fmt.Sprintf("Result field type: %T", responseMap["result"]))
-
-	result, ok := responseMap["result"].(map[string]interface{})
+	// Extract the pair data using the correct key.
+	pairData, ok := data[krakenPair].(map[string]interface{})
 	if !ok {
-		return nil, fmt.Errorf("unexpected type for result field in Kraken response")
-	}
-
-	pairData, ok := result[krakenPair].(map[string]interface{})
-	if !ok {
+		// If the key doesn't match, log the keys for debugging
+		keys := make([]string, 0, len(data))
+		for k := range data {
+			keys = append(keys, k)
+		}
+		logger.Info(fmt.Sprintf("available keys in response: %v", keys))
 		return nil, fmt.Errorf("pair data not found in response for %s", krakenPair)
 	}
 

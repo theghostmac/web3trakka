@@ -60,6 +60,7 @@ func (bc *BinanceClient) GetSymbolDetails(pairSymbol string) (*SymbolDetails, er
 
 			// Optional: Fetch additional data like 24hr ticker price change statistics
 			ticker24hr, err := bc.Client.NewTicker24hrService().Symbol(pairSymbol).Do(context.Background())
+			//logger.Info(fmt.Sprintf("Fetching ticker24hr: %+v", ticker24hr))
 			if err != nil {
 				errMsg := fmt.Sprintf("Failed to fetch 24hr ticker data for pairSymbol %s: %v", pairSymbol, err)
 				logger.Warning(errMsg)
