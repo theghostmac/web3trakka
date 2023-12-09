@@ -69,7 +69,7 @@ func (oc *OKEXClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, erro
 
 	// Map the data to the SymbolDetails struct.
 	details := &crypto.SymbolDetails{
-		Symbol:                 string(tickerData.InstType),
+		Symbol:                 pair,
 		Status:                 "",
 		BaseAsset:              "",
 		BaseAssetPrecision:     0,
