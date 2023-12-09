@@ -94,4 +94,6 @@ func (bc *BinanceClient) GetSymbolDetails(pairSymbol string) (*crypto.SymbolDeta
 	return nil, fmt.Errorf("pairSymbol %s not found", pairSymbol)
 }
 
-func (bc *BinanceClient) ExecuteTrade() {}
+func (bc *BinanceClient) ExecuteTrade(symbol, orderType string, price float64) error {
+	return nil
+}

@@ -103,4 +103,6 @@ func (oc *OKEXClient) GetSymbolDetails(pair string) (*crypto.SymbolDetails, erro
 	return details, nil
 }
 
-func (oc *OKEXClient) ExecuteTrade() {}
+func (oc *OKEXClient) ExecuteTrade(symbol, orderType string, price float64) error {
+	return nil
+}

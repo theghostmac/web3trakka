@@ -2,7 +2,10 @@ package arbitrage
 
 import (
 	"fmt"
+	"github.com/theghostmac/web3trakka/external/binance"
 	"github.com/theghostmac/web3trakka/external/crypto"
+	"github.com/theghostmac/web3trakka/external/kraken"
+	"github.com/theghostmac/web3trakka/external/okex"
 	"github.com/theghostmac/web3trakka/internal/housekeeper"
 	"reflect"
 	"sort"
@@ -139,16 +142,53 @@ func (a *Arbitrage) getExchangeIdentifier(exchange ExchangeClient) string {
 
 // placeOrder is responsible for placing an order on an exchange.
 func (a *Arbitrage) placeOrder(exchangeName, symbol, orderType string, price float64) error {
+	var err error
+
+	// Initialize clients for exchanges.
+	binanceClient, err := binance.NewBinanceClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize binance client due to: %v", err)
+		logger.Error(errMsg)
+	}
+
+	krakenClient, err := kraken.NewKrakenClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize kraken client due to: %v", err)
+		logger.Error(errMsg)
+	}
+
+	okEXClient, err := okex.NewOKEXClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize binance client due to: %v", err)
+		logger.Error(errMsg)
+	}
+
 	switch exchangeName {
 	case "Binance":
 		// TODO: call the Binance ExecuteTrade method.
+		err = binanceClient.ExecuteTrade(symbol, orderType, price)
 		fmt.Printf("Calling Binance ExecuteTrade method...")
 	case "Kraken":
 		// TODO: call the Kraken ExecuteTrade method.
+		err = krakenClient.ExecuteTrade(symbol, orderType, price)
 		fmt.Printf("Calling Kraken ExecuteTrade method...")
+	case "OkexClient":
+		err = okEXClient.ExecuteTrade(symbol, orderType, price)
+		fmt.Printf("Callign OkEX ExecuteTrade method...")
+
+		// TODO: add other exchanges
 	default:
 		return fmt.Errorf("exchange not supported: %s", exchangeName)
 	}
 
+	if err != nil {
+		// log the error.
+		errMsg := fmt.Sprintf("Error executing trade on %s: %v\n", err)
+		logger.Error(errMsg)
+	}
+
+	successMsg := fmt.Sprintf("Order placed successfully on: %s: %s %s at %f\n",
+		exchangeName, orderType, symbol, price)
+	logger.Info(successMsg)
 	return nil
 }
