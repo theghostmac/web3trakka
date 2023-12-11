@@ -154,17 +154,6 @@ func (a *Arbitrage) getExchangeIdentifier(exchange ExchangeClient) string {
 	}
 }
 
-//// getExchangeIdentifier returns a unique identifier for an exchange client.
-//func (a *Arbitrage) getExchangeIdentifier(exchange ExchangeClient) string {
-//	exchangeType := reflect.TypeOf(exchange)
-//
-//	if exchangeType.Kind() == reflect.Ptr {
-//		exchangeType = exchangeType.Elem()
-//	}
-//
-//	return exchangeType.Name()
-//}
-
 // placeOrder is responsible for placing an order on an exchange.
 func (a *Arbitrage) placeOrder(exchangeName, symbol, orderType string, price float64) error {
 	var err error
