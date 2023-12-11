@@ -15,6 +15,7 @@ Use this `Makefile`:
 - You can track a crypto pair using the `track` command.
 - You can set price alerts to buy a pair at a certain price using the `alert` command.
 - You can also view your portfolio using the `view` command.
+- You can also find arbitrage opportunities using the `arbitrage` command, followed by a cryto pair.
 
 To see how a command works, run this to show help:
 ```shell
