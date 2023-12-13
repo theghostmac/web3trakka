@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/theghostmac/web3trakka/external/binance"
 	"github.com/theghostmac/web3trakka/external/kraken"
+	"github.com/theghostmac/web3trakka/external/kucoin"
 	"github.com/theghostmac/web3trakka/external/okex"
 	"github.com/theghostmac/web3trakka/internal/housekeeper"
 	"github.com/theghostmac/web3trakka/internal/runner"
@@ -47,12 +48,20 @@ func main() {
 		exchanges = append(exchanges, okEXClient)
 	}
 
+	kucoinClient, err := kucoin.NewKucoinClient()
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to initialize binance client due to: %v", err)
+		logger.Error(errMsg)
+	} else {
+		exchanges = append(exchanges, kucoinClient)
+	}
+
 	trackCrypto := web3trakka.NewCryptoTracker()
 	viewPortfolio := web3trakka.NewPortfolioViewer()
 	setAlert := web3trakka.NewAlertSetter()
 
 	arbitrager := arbitrage.NewArbitrage([]arbitrage.ExchangeClient{
-		binanceClient, krakenClient,
+		binanceClient, krakenClient, okEXClient, kucoinClient,
 	})
 
 	// Define web3trakka commands
